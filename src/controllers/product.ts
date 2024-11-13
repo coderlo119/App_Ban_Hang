@@ -201,14 +201,14 @@ export const getProductDetail: RequestHandler = async (req, res) => {
       name: product.name,
       description: product.description,
       thumbnail: product.thumbnail,
-      category: product.thumbnail,
+      category: product.category,
       date: product.purchasingDate,
       price: product.price,
       image: product.images?.map(({ url }) => url),
       seller: {
         id: product.owner._id,
         name: product.owner.name,
-        avatar: product.owner.avatar,
+        avatar: product.owner.avatar?.url,
       },
     },
   });
