@@ -108,7 +108,7 @@ export const signIn: RequestHandler = async (req, res) => {
     expiresIn: "15m",
   });
 
-  const refreshToken = jwt.sign(payload, "secret");
+  const refreshToken = jwt.sign(payload, JWT_SECRET);
 
   if (!user.tokens) user.tokens = [refreshToken];
   else user.tokens.push(refreshToken);
@@ -121,6 +121,7 @@ export const signIn: RequestHandler = async (req, res) => {
       email: user.email,
       name: user.name,
       verified: user.verified,
+      avatar: user.avatar?.url,
     },
     tokens: { refresh: refreshToken, access: accessToken },
   });
@@ -137,7 +138,7 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
 
   if (!refreshToken) return sendErrorRes(res, "Yêu cầu không hợp lệ!", 403);
 
-  const payload = jwt.verify(refreshToken, "secret") as { id: string };
+  const payload = jwt.verify(refreshToken, JWT_SECRET) as { id: string };
 
   if (!payload.id) return sendErrorRes(res, "Yêu cầu không hợp lệ!", 401);
 
@@ -151,11 +152,11 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
     return sendErrorRes(res, "Yêu cầu không hợp lệ!", 401);
   }
 
-  const newAccessToken = jwt.sign({ id: user._id }, "secret", {
+  const newAccessToken = jwt.sign({ id: user._id }, JWT_SECRET, {
     expiresIn: "15m",
   });
 
-  const newRefreshToken = jwt.sign({ id: user._id }, "secret");
+  const newRefreshToken = jwt.sign({ id: user._id }, JWT_SECRET);
 
   const filteredTokens = user.tokens.filter((t) => t !== refreshToken);
   user.tokens = filteredTokens;
@@ -234,7 +235,7 @@ export const updateProfile: RequestHandler = async (req, res) => {
     return sendErrorRes(res, "Tên không hợp lệ", 422);
   }
 
-  UserModel.findByIdAndUpdate(req.user.id, { name });
+  await UserModel.findByIdAndUpdate(req.user.id, { name });
 
   res.json({ profile: { ...req.user, name } });
 };

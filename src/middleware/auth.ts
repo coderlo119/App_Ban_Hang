@@ -25,13 +25,13 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 export const isAuth: RequestHandler = async (req, res, next) => {
   try {
     const authToken = req.headers.authorization;
-    if (!authToken) return sendErrorRes(res, "Yêu cầu không hợp lệ1!", 403);
+    if (!authToken) return sendErrorRes(res, "Yêu cầu không hợp lệ!", 403);
 
     const token = authToken.split("Bearer ")[1];
     const payload = jwt.verify(token, JWT_SECRET) as { id: string };
 
     const user = await UserModel.findById(payload.id);
-    if (!user) return sendErrorRes(res, "Yêu cầu không hợp lệ2!", 403);
+    if (!user) return sendErrorRes(res, "Yêu cầu không hợp lệ!", 403);
 
     req.user = {
       id: user._id as string,

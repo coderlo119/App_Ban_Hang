@@ -33,9 +33,9 @@ productRouter.patch(
 );
 productRouter.delete("/:id", isAuth, deleteProduct);
 productRouter.delete("/image/:productId/:imageId", isAuth, deleteProductImage);
-productRouter.get("/detail/:id", /*isAuth,*/ getProductDetail);
-productRouter.get("/by-category/:category", /*isAuth,*/ getProductByCategory);
-productRouter.get("/latest", /*isAuth,*/ getLatestProduct);
-productRouter.get("/listenings", isAuth, getListings);
+productRouter.get("/detail/:id", getProductDetail);
+productRouter.get("/by-category/:category", getProductByCategory);
+productRouter.get("/latest", getLatestProduct);
+productRouter.get("/listings", isAuth, getListings);
 
 export default productRouter;

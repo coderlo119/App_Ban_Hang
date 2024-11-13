@@ -75,5 +75,5 @@ export const newProductSchema = yup.object({
         return "";
       }
     })
-    .required("Ngày mua không được để trống!"),
+    .required("Ngày mua sản phẩm không được để trống!"),
 });
