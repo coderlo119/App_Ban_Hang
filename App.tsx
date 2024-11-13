@@ -1,20 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  Platform,
+  StyleSheet,
+  View,
+  StatusBar,
+  SafeAreaView,
+} from "react-native";
+import Navigator from "src/navigator";
+import FlashMessage from "react-native-flash-message";
+import { Provider } from "react-redux";
+import store from "@store/index";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Provider store={store}>
+      <SafeAreaView style={styles.container}>
+        <Navigator />
+        <FlashMessage position="top" />
+      </SafeAreaView>
+    </Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 });
