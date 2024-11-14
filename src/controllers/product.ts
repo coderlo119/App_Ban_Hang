@@ -8,10 +8,17 @@ import { sendErrorRes } from "utils/helper";
 import { date } from "yup";
 import categories from "utils/categories";
 
+// const uploadImage = (filePath: string): Promise<UploadApiResponse> => {
+//   return cloudUploader.upload(filePath, {
+//     width: 1280,
+//     height: 720,
+//     crop: "fill",
+//   });
+// };
 const uploadImage = (filePath: string): Promise<UploadApiResponse> => {
   return cloudUploader.upload(filePath, {
-    width: 1280,
-    height: 720,
+    width: 1000,
+    height: 1000,
     crop: "fill",
   });
 };
