@@ -1,4 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
+import colors from "@utils/color";
 import size from "@utils/size";
 import { FC } from "react";
 import { View, StyleSheet, Text, Pressable } from "react-native";

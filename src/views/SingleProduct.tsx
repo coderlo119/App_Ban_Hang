@@ -8,7 +8,6 @@ import OptionButton from "@Ui/OptionButton";
 import React, { useEffect, useState } from "react";
 import { FC } from "react";
 import { View, StyleSheet, Text, Alert, Pressable } from "react-native";
-import { NativeStackScreenProps } from "react-native-screens/lib/typescript/native-stack/types";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import colors from "@utils/color";
 import useClient from "@hooks/useClient";
@@ -17,6 +16,8 @@ import { showMessage } from "react-native-flash-message";
 import LoadingSpinner from "@Ui/LoadingSpinner";
 import { useDispatch } from "react-redux";
 import { deleteItem, Product } from "@store/listings";
+import ChatIcon from "@conponents/ChatIcon";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<ProfileNavigatorParamList, "SingleProduct">;
 
@@ -34,12 +35,13 @@ const SingleProduct: FC<Props> = ({ route, navigation }) => {
   const { authState } = useAuth();
   const { authClient } = useClient();
   const [busy, setBusy] = useState(false);
+  const [fetchingChatID, setFetchingChatID] = useState(false);
   const [productInfo, setProductInfo] = useState<Product>();
   const dispatch = useDispatch();
   const { product, id } = route.params;
   const [showMenu, setShowMenu] = useState(false);
 
-  const isAdmin = authState.profile?.id === product?.seller.id;
+  const isAdmin = authState.profile?.id === productInfo?.seller.id;
 
   const confirmDelete = async () => {
     const id = product?.id;
@@ -67,6 +69,21 @@ const SingleProduct: FC<Props> = ({ route, navigation }) => {
     );
   };
 
+  const onChatBtnPress = async () => {
+    if (!productInfo) return;
+    setFetchingChatID(true);
+    const res = await runAxiosAsync<{ conversationId: string }>(
+      authClient.get("/conversation/with/" + productInfo.seller.id)
+    );
+    setFetchingChatID(false);
+    if (res) {
+      navigation.navigate("ChatWindow", {
+        conversationId: res.conversationId,
+        peerProfile: productInfo.seller,
+      });
+    }
+  };
+
   const fectchProductInfo = async (id: string) => {
     const res = await runAxiosAsync<{ product: Product }>(
       authClient.get("/product/detail/" + id)
@@ -91,12 +108,9 @@ const SingleProduct: FC<Props> = ({ route, navigation }) => {
       <View style={styles.container}>
         {productInfo ? <ProductDetail product={productInfo} /> : <></>}
 
-        <Pressable
-          style={styles.messageBtn}
-          onPress={() => navigation.navigate("ChatWindow")}
-        >
-          <AntDesign name="message1" size={20} color={colors.white} />
-        </Pressable>
+        {!isAdmin && (
+          <ChatIcon onPress={onChatBtnPress} busy={fetchingChatID} />
+        )}
       </View>
       <OptionModal
         options={menuOption}
@@ -134,17 +148,6 @@ const styles = StyleSheet.create({
   optionTitle: {
     paddingLeft: 5,
     color: colors.primary,
-  },
-  messageBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: colors.active,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 30,
-    right: 20,
   },
 });
 
