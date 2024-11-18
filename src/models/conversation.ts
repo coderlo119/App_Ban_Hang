@@ -1,5 +1,4 @@
 import { Document, model, ObjectId, Schema } from "mongoose";
-import { boolean } from "yup";
 
 interface Chat {
   _id: ObjectId;

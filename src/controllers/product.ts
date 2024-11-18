@@ -1,8 +1,8 @@
 import { UploadApiResponse } from "cloudinary";
 import { RequestHandler } from "express";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, RootFilterQuery } from "mongoose";
 import cloudUploader, { cloudApi } from "src/cloud";
-import ProductModel from "models/product";
+import ProductModel, { ProductDocuument } from "models/product";
 import { UserDocument } from "models/user";
 import { sendErrorRes } from "utils/helper";
 import { date } from "yup";
@@ -290,4 +290,21 @@ export const getListings: RequestHandler = async (req, res) => {
     };
   });
   res.json({ products: listings });
+};
+export const searchProducts: RequestHandler = async (req, res) => {
+  const { name } = req.query;
+
+  const filter: RootFilterQuery<ProductDocuument> = {};
+
+  if (typeof name === "string") filter.name = { $regex: new RegExp(name, "i") };
+
+  const products = await ProductModel.find(filter).limit(50);
+
+  res.json({
+    results: products.map((product) => ({
+      id: product._id,
+      name: product.name,
+      thumbnail: product.thumbnail,
+    })),
+  });
 };
