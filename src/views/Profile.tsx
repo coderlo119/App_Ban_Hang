@@ -6,7 +6,7 @@ import AvatarView from "@Ui/AvatarView";
 import FormDivider from "@Ui/FormDivider";
 import colors from "@utils/color";
 import size from "@utils/size";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import {
   StyleSheet,
@@ -20,12 +20,17 @@ import {
 import useClient from "@hooks/useClient";
 import { runAxiosAsync } from "@api/runAxiosAsync";
 import { ProfileRes } from "@navigator/index";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { updateAuthState } from "@store/auth";
 import { showMessage } from "react-native-flash-message";
 import { selectImages } from "@utils/helper";
 import mime from "mime";
 import LoadingSpinner from "@Ui/LoadingSpinner";
+import {
+  ActiveChat,
+  addNewActiveChats,
+  getUnreadChatsCount,
+} from "@store/chats";
 
 interface Props {}
 
@@ -40,6 +45,7 @@ const Profile: FC<Props> = (props) => {
   const [refreshing, setRefreshing] = useState(false);
   const { authClient } = useClient();
   const dispatch = useDispatch();
+  const totalUnreadMessages = useSelector(getUnreadChatsCount);
   const isNameChanged =
     profile?.name !== userName && userName.trim().length >= 3;
 
@@ -64,6 +70,16 @@ const Profile: FC<Props> = (props) => {
       );
     }
   };
+  const fetchLastChats = async () => {
+    const res = await runAxiosAsync<{ chats: ActiveChat[] }>(
+      authClient("/conversation/last-chats")
+    );
+
+    if (res) {
+      dispatch(addNewActiveChats(res.chats));
+    }
+  };
+
   const getVerificationLink = async () => {
     setBusy(true);
     const res = await runAxiosAsync<{ message: string }>(
@@ -120,6 +136,13 @@ const Profile: FC<Props> = (props) => {
       );
     }
   };
+
+  useEffect(() => {
+    const handleApiRequest = async () => {
+      await fetchLastChats();
+    };
+    handleApiRequest();
+  }, []);
   return (
     <ScrollView
       refreshControl={
@@ -170,6 +193,7 @@ const Profile: FC<Props> = (props) => {
         antIconName="message1"
         title="Tin nhắn"
         onPress={onMessagePress}
+        active={totalUnreadMessages > 0}
       />
       <ProfileOptionListItem
         style={styles.marginBottom}

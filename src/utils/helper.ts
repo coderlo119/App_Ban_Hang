@@ -1,5 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import { showMessage } from "react-native-flash-message";
+import { number } from "yup";
 
 export const formatPrice = (amount: number) => {
   return new Intl.NumberFormat("vi-VN", {
@@ -27,4 +28,20 @@ export const selectImages = async (
     showMessage({ message: (error as any).message, type: "danger" });
   }
   return result;
+};
+
+let timeoutId: NodeJS.Timeout;
+export const debounce = <T extends any[], R>(
+  func: (...args: T) => Promise<R>,
+  timeout: number
+) => {
+  return (...args: T): Promise<R> => {
+    return new Promise<R>((resolve) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(async () => {
+        const res = await func(...args);
+        resolve(res);
+      }, timeout);
+    });
+  };
 };
