@@ -22,6 +22,8 @@ import { runAxiosAsync } from "@api/runAxiosAsync";
 import useAuth from "@hooks/useAuth";
 import useClient from "@hooks/useClient";
 import { debounce } from "@utils/helper";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { AppStackParamList } from "@navigator/AppNavigator";
 
 interface Props {
   visible: boolean;
@@ -51,7 +53,7 @@ const searchResults = [
 ];
 
 type SearchResult = {
-  id: number;
+  id: string;
   name: string;
   thumbnail?: string;
 };
@@ -59,9 +61,11 @@ type SearchResult = {
 const SearchModal: FC<Props> = ({ visible, onClose }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const { authClient } = useClient();
+  const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
   const handleClose = () => {
     onClose(!visible);
   };
@@ -77,12 +81,14 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
   const searchDebounce = debounce(searchProduct, 300);
 
   const handleChange = async (value: string) => {
+    setNotFound(false);
     setQuery(value);
     setBusy(true);
     const res = await searchDebounce(value);
     setBusy(false);
     if (res) {
-      setResults(res.results);
+      if (res.results.length) setResults(res.results);
+      else setNotFound(true);
     }
   };
   useEffect(() => {
@@ -135,9 +141,12 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
 
           <View style={{ paddingBottom: keyboardHeight }}>
             <FlatList
-              data={results}
+              data={!busy ? results : []}
               renderItem={({ item }) => (
-                <Pressable style={styles.searchResultItem}>
+                <Pressable
+                  onPress={() => navigate("SingleProduct", { id: item.id })}
+                  style={styles.searchResultItem}
+                >
                   <Image
                     source={{ uri: item.thumbnail }}
                     style={styles.thumbnail || undefined}
@@ -148,7 +157,9 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
               keyExtractor={(item) => item.id.toString()}
               contentContainerStyle={styles.suggestionList}
               ListEmptyComponent={
-                <EmptyView title="Không tìm thấy sản phẩm nào..." />
+                notFound ? (
+                  <EmptyView title="Không tìm thấy sản phẩm nào..." />
+                ) : null
               }
             />
           </View>
