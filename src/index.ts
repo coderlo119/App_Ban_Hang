@@ -91,36 +91,61 @@ io.on("connection", (socket) => {
   const socketData = socket.data as { jwtDecode: { id: string } };
   const userId = socketData.jwtDecode.id;
 
+  // Tham gia room theo userId
   socket.join(userId);
 
+  // Xử lý gửi tin nhắn mới
   socket.on("chat:new", async (data: IncomingMessage) => {
-    const { conversationId, to, message } = data;
+    try {
+      const { conversationId, to, message } = data;
 
-    await ConversationModel.findByIdAndUpdate(conversationId, {
-      $push: {
-        chats: {
-          sentBy: message.user.id,
-          content: message.text,
-          timestamp: message.time,
+      if (!conversationId || !to || !message) {
+        throw new Error("Invalid chat:new data");
+      }
+
+      await ConversationModel.findByIdAndUpdate(conversationId, {
+        $push: {
+          chats: {
+            sentBy: message.user.id,
+            content: message.text,
+            timestamp: message.time,
+          },
         },
-      },
-    });
+      });
 
-    const messageResponse: OutgoingMessageResponse = {
-      from: message.user,
-      conversationId,
-      message: { ...message, viewed: false },
-    };
-    socket.to(to).emit("chat:message", messageResponse);
+      const messageResponse: OutgoingMessageResponse = {
+        from: {
+          id: message.user.id,
+          name: message.user.name,
+        },
+        conversationId,
+        message: { ...message, viewed: false },
+      };
+
+      io.to(to).emit("chat:message", messageResponse);
+    } catch (error) {
+      console.error("Error handling chat:new:", error);
+    }
   });
 
+  // Xử lý trạng thái đã xem
   socket.on(
     "chat:seen",
     async ({ conversationId, messageId, peerId }: SeenData) => {
-      await updateSeenStatus(peerId, conversationId);
-      socket.to(peerId).emit("chat:seen", { conversationId, messageId });
+      try {
+        await updateSeenStatus(peerId, conversationId);
+        io.to(peerId).emit("chat:seen", { conversationId, messageId });
+      } catch (error) {
+        console.error("Error handling chat:seen:", error);
+      }
     }
   );
+
+  // Xử lý trạng thái đang nhập tin nhắn
+  socket.on("chat:typing", (typingData: { to: string; active: boolean }) => {
+    io.to(typingData.to).emit("chat:typing", { typing: typingData.active });
+    console.log(typingData);
+  });
 });
 
 app.post("/upload-file", async (req, res) => {
