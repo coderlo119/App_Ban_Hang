@@ -14,7 +14,7 @@ import BackButton from "@Ui/BackBotton";
 import EmptyChatContainer from "@Ui/EmptyChatContainer";
 import PeerProfile from "@Ui/PeerProfile";
 import { FC, useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import { useDispatch, useSelector } from "react-redux";
 import socket, { NewMessageResponse } from "src/socket";
@@ -63,6 +63,9 @@ const formatConversationToIMessage = (value?: Conversation): IMessage[] => {
   return message.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 };
 
+let timeoutId: NodeJS.Timeout | null;
+const TYPING_TIMEOUT = 2000;
+
 const ChatWindow: FC<Props> = ({ route }) => {
   const { authState } = useAuth();
   const { conversationId, peerProfile } = route.params;
@@ -70,6 +73,7 @@ const ChatWindow: FC<Props> = ({ route }) => {
   const dispatch = useDispatch();
   const { authClient } = useClient();
   const [fetchingChats, setFetchingChats] = useState(false);
+  const [typing, setTyping] = useState(false);
 
   const profile = authState.profile;
 
@@ -112,6 +116,22 @@ const ChatWindow: FC<Props> = ({ route }) => {
     socket.emit("chat:new", newMessage);
   };
 
+  const emitTypingEnd = (timeout: number) => {
+    return setTimeout(() => {
+      socket.emit("chat:typing", { active: false, to: peerProfile.id });
+      timeoutId = null;
+    }, timeout);
+  };
+
+  const handleOnInputChange = () => {
+    if (timeoutId) {
+      timeoutId = emitTypingEnd(TYPING_TIMEOUT);
+    } else {
+      socket.emit("chat:typing", { active: true, to: peerProfile.id });
+      timeoutId = emitTypingEnd(TYPING_TIMEOUT);
+    }
+  };
+
   const fetchOldChats = async () => {
     setFetchingChats(true);
     const res = await runAxiosAsync<{ conversation: Conversation }>(
@@ -138,6 +158,10 @@ const ChatWindow: FC<Props> = ({ route }) => {
     handleApiRequest();
   }, []);
 
+  const updateTypingStatus = (data: { typing: boolean }) => {
+    setTyping(data.typing);
+  };
+
   useFocusEffect(
     useCallback(() => {
       const updateSeenStatus = (data: NewMessageResponse) => {
@@ -148,8 +172,12 @@ const ChatWindow: FC<Props> = ({ route }) => {
         });
       };
       socket.on("chat:message", updateSeenStatus);
+      socket.on("chat:typing", updateTypingStatus);
 
-      return () => socket.off("chat:message", updateSeenStatus);
+      return () => {
+        socket.off("chat:message", updateSeenStatus);
+        socket.off("chat:typing", updateTypingStatus);
+      };
     }, [])
   );
 
@@ -174,6 +202,8 @@ const ChatWindow: FC<Props> = ({ route }) => {
         }}
         onSend={handleOnMessageSend}
         renderChatEmpty={() => <EmptyChatContainer />}
+        onInputTextChanged={handleOnInputChange}
+        isTyping={typing}
       />
     </View>
   );

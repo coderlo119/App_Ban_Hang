@@ -10,11 +10,11 @@ import {
   Keyboard,
   Platform,
   Image,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SearchBar from "./SearchBar";
 import colors from "@utils/color";
-import { SafeAreaView } from "react-native-safe-area-context";
 import size from "@utils/size";
 import EmptyView from "@views/EmptyView";
 import LottieView from "lottie-react-native";
@@ -68,6 +68,11 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
   const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
   const handleClose = () => {
     onClose(!visible);
+  };
+
+  const handleOnResultPress = (results: SearchResult) => {
+    navigate("SingleProduct", { id: results.id });
+    handleClose();
   };
 
   const searchProduct = async (query: string) => {
@@ -144,7 +149,7 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
               data={!busy ? results : []}
               renderItem={({ item }) => (
                 <Pressable
-                  onPress={() => navigate("SingleProduct", { id: item.id })}
+                  onPress={() => handleOnResultPress(item)}
                   style={styles.searchResultItem}
                 >
                   <Image

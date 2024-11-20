@@ -1,5 +1,5 @@
 import axios from "axios";
-export const baseURL = "http://10.0.117.156:8000";
+export const baseURL = "http://10.0.143.28:8000";
 
 const client = axios.create({ baseURL });
 
