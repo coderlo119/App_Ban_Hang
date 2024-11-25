@@ -2,12 +2,20 @@ import { useNavigation } from "@react-navigation/native";
 import colors from "@utils/color";
 import size from "@utils/size";
 import { FC } from "react";
-import { View, StyleSheet, Text, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  Pressable,
+  ViewStyle,
+  StyleProp,
+} from "react-native";
 
 interface Props {
   backButton?: JSX.Element | null;
   center?: JSX.Element | null;
   right?: JSX.Element | null;
+  style?: StyleProp<ViewStyle>;
 }
 
 const AppHeader: FC<Props> = ({ backButton, center, right }) => {

@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { View, StyleSheet, Pressable, Text, StatusBar } from "react-native";
 import FormInput from "@Ui/FormInput";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -16,28 +16,48 @@ import { runAxiosAsync } from "@api/runAxiosAsync";
 import LoadingSpinner from "@Ui/LoadingSpinner";
 import { selectImages } from "@utils/helper";
 import CategoryOptions from "@conponents/CategoryOptions";
+import ProvinceOptions from "@conponents/ProvinceOptions";
+import DistrictOptions from "@conponents/DistrictOptions";
 
 interface Props {}
 
+type tinh = {
+  name: string;
+  code?: number;
+};
 const defaultInfo = {
   name: "",
   description: "",
   category: "",
   price: "",
   purchasingDate: new Date(),
+  provinceName: "",
+  districtName: "",
 };
 
 const imageOptions = [{ value: "Remove Image", id: "remove" }];
 
 const NewListing: FC<Props> = (props) => {
   const [productInfo, setProductInfo] = useState({ ...defaultInfo });
+  const [tinhInfo, setTinhInfo] = useState<tinh | undefined>(undefined);
+
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [busy, setBusy] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState("");
   const { authClient } = useClient();
 
-  const { category, name, description, price, purchasingDate } = productInfo;
+  const {
+    category,
+    name,
+    description,
+    price,
+    purchasingDate,
+    provinceName,
+    districtName,
+  } = productInfo;
+
+  const [provinceCode, setProvinceCode] = useState<number | null>();
 
   const handleChange = (name: string) => (text: string) =>
     setProductInfo({ ...productInfo, [name]: text });
@@ -79,14 +99,17 @@ const NewListing: FC<Props> = (props) => {
       setProductInfo({ ...defaultInfo });
       setImages([]);
     }
-    console.log(res);
   };
 
   const handleOnImageSelection = async () => {
     const newImages = await selectImages();
     setImages([...images, ...newImages]);
   };
-
+  useEffect(() => {
+    if (provinceCode !== undefined) {
+      console.log(provinceCode); // Logs the updated value
+    }
+  }, [provinceCode]);
   return (
     <CustomKeyAvoidingView>
       <View style={styles.container}>
@@ -109,7 +132,6 @@ const NewListing: FC<Props> = (props) => {
             }}
           />
         </View>
-
         <FormInput
           value={name}
           placeholder="Tên sản phẩm"
@@ -128,10 +150,23 @@ const NewListing: FC<Props> = (props) => {
             setProductInfo({ ...productInfo, purchasingDate })
           }
         />
-
         <CategoryOptions
           onSelect={handleChange("category")}
           title={category || "Category"}
+        />
+        <ProvinceOptions
+          onSelect={(province: tinh) => {
+            setProvinceCode(province.code);
+            setTinhInfo(province);
+            setProductInfo({ ...productInfo, provinceName: province.name });
+          }}
+          title={provinceName || "Chọn tỉnh/thành phố bạn muốn mua hàng"}
+        />
+
+        <DistrictOptions
+          onSelect={handleChange("districtName")}
+          title={districtName || "Chọn quận/huyện bạn muốn mua hàng"}
+          provinceCode={provinceCode}
         />
 
         <FormInput
@@ -141,9 +176,7 @@ const NewListing: FC<Props> = (props) => {
           numberOfLines={4}
           onChangeText={handleChange("description")}
         />
-
         <AppButton title="Thêm sản phẩm" onPress={handleSubmit} />
-
         <OptionModal
           visible={showImageOptions}
           onRequestClose={setShowImageOptions}

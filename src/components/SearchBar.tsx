@@ -1,5 +1,13 @@
 import { FC } from "react";
-import { View, StyleSheet, TextInput, Pressable, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Text,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import colors from "@utils/color";
 
@@ -7,6 +15,7 @@ interface Props {
   asButton?: boolean;
   onPress?(): void;
   onChange?(text: string): void;
+  style?: StyleProp<ViewStyle>;
   value?: string;
 }
 

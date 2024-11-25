@@ -29,28 +29,6 @@ interface Props {
   visible: boolean;
   onClose(visible: boolean): void;
 }
-const searchResults = [
-  { id: 1, name: "iPhone 13 Pro Max" },
-  { id: 2, name: "Samsung Galaxy S21 Ultra" },
-  { id: 3, name: "MacBook Pro 16-inch" },
-  { id: 4, name: "Dell XPS 13" },
-  { id: 5, name: "Sony PlayStation 5" },
-  { id: 6, name: "Nintendo Switch OLED" },
-  { id: 7, name: "Canon EOS R5" },
-  { id: 8, name: "Sony A7 III" },
-  { id: 9, name: "Bose QuietComfort 45" },
-  { id: 10, name: "AirPods Pro" },
-  { id: 11, name: "Nike Air Max 270" },
-  { id: 12, name: "Adidas Ultraboost 21" },
-  { id: 13, name: "Lululemon Align Pants" },
-  { id: 14, name: "Patagonia Nano Puff Jacket" },
-  { id: 15, name: "Yeti Tundra 45 Cooler" },
-  { id: 16, name: "Hydro Flask 32 oz Wide Mouth" },
-  { id: 17, name: "Kindle Paperwhite" },
-  { id: 18, name: "Fujifilm Instax Mini 11" },
-  { id: 19, name: "Anker PowerCore 10000" },
-  { id: 20, name: "Google Nest Thermostat" },
-];
 
 type SearchResult = {
   id: string;
@@ -86,14 +64,26 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
   const searchDebounce = debounce(searchProduct, 300);
 
   const handleChange = async (value: string) => {
+    setQuery(value); // Cập nhật giá trị ô tìm kiếm
     setNotFound(false);
-    setQuery(value);
-    setBusy(true);
-    const res = await searchDebounce(value);
     setBusy(false);
-    if (res) {
-      if (res.results.length) setResults(res.results);
-      else setNotFound(true);
+
+    // Xử lý khi ô tìm kiếm rỗng
+    if (!value.trim()) {
+      setResults([]); // Xóa kết quả tìm kiếm
+      setNotFound(true); // Hiển thị thông báo không có sản phẩm
+      return;
+    }
+
+    // Xử lý khi có nội dung trong ô tìm kiếm
+    if (value.trim().length >= 3) {
+      setBusy(true);
+      const res = await searchDebounce(value);
+      setBusy(false);
+      if (res) {
+        if (res.results.length) setResults(res.results);
+        else setNotFound(true);
+      }
     }
   };
   useEffect(() => {

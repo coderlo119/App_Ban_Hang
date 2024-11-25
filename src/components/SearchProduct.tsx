@@ -2,25 +2,17 @@ import colors from "@utils/color";
 import { FC } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import ProductGridView from "./ProductGridView";
-
-export type LatestProduct = {
-  id: string;
-  name: string;
-  thumbnail?: string;
-  category: string;
-  price: number;
-  address: string;
-};
+import { LatestProduct } from "./LatesProductList";
 
 interface Props {
   data: LatestProduct[];
   onPress(product: LatestProduct): void;
 }
 
-const LatesProductList: FC<Props> = ({ data, onPress }) => {
+const SearchProductList: FC<Props> = ({ data, onPress }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sản phẩm mới</Text>
+      <Text style={styles.title}>Kết quả tìm kiếm của bạn</Text>
       <ProductGridView data={data} onPress={onPress} />
     </View>
   );
@@ -37,4 +29,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LatesProductList;
+export default SearchProductList;

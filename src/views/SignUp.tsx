@@ -13,15 +13,26 @@ import { runAxiosAsync } from "src/api/runAxiosAsync";
 import { showMessage } from "react-native-flash-message";
 import client from "@api/client";
 import useAuth from "@hooks/useAuth";
+import ProvinceOptions from "@conponents/ProvinceOptions";
+import DistrictOptions from "@conponents/DistrictOptions";
 
 interface Props {}
+
+type tinh = {
+  name: string;
+  code?: number;
+};
 
 const SignUp: FC<Props> = (props) => {
   const [userInfo, setUserInfo] = useState({
     name: "",
     email: "",
     password: "",
+    provinceName: "",
+    districtName: "",
   });
+  const [tinhInfo, setTinhInfo] = useState<tinh | undefined>(undefined);
+  const [provinceCode, setProvinceCode] = useState<number | null>();
   const [busy, setBusy] = useState(false);
   const { navigate } = useNavigation<NavigationProp<AuthStackParamList>>();
   const { signIn } = useAuth();
@@ -44,7 +55,7 @@ const SignUp: FC<Props> = (props) => {
     setBusy(false);
   };
 
-  const { email, name, password } = userInfo;
+  const { email, name, password, provinceName, districtName } = userInfo;
   return (
     <CustomKeyAvoidingView>
       <View style={styles.innerContainer}>
@@ -67,6 +78,20 @@ const SignUp: FC<Props> = (props) => {
             secureTextEntry
             value={password}
             onChangeText={handleChange("password")}
+          />
+          <ProvinceOptions
+            onSelect={(province: tinh) => {
+              setProvinceCode(province.code);
+              setTinhInfo(province);
+              setUserInfo({ ...userInfo, provinceName: province.name });
+            }}
+            title={provinceName || "Chọn tỉnh/thành phố bạn muốn mua hàng"}
+          />
+
+          <DistrictOptions
+            onSelect={handleChange("districtName")}
+            title={districtName || "Chọn quận/huyện bạn muốn mua hàng"}
+            provinceCode={provinceCode}
           />
           <AppButton active={!busy} title="Đăng kí" onPress={handleSubmit} />
           <FormDivider />
