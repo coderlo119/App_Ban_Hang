@@ -1,16 +1,16 @@
 import AvatarView from "@Ui/AvatarView";
 import colors from "@utils/color";
 import { formatDate } from "@utils/date";
-import { formatPrice } from "@utils/helper";
+import { formatPrice, replacedAddress } from "@utils/helper";
 import size from "@utils/size";
 import { FC } from "react";
 import { View, StyleSheet, Text, ScrollView } from "react-native";
 import ImageSlider from "./ImageSlider";
-import { Product } from "@store/listings";
 import FormDivider from "@Ui/FormDivider";
+import { Product2 } from "@views/Listings";
 
 interface Props {
-  product: Product;
+  product: Product2;
 }
 
 const ProductDetail: FC<Props> = ({ product }) => {
@@ -25,6 +25,7 @@ const ProductDetail: FC<Props> = ({ product }) => {
         Mua ngày: {formatDate(product.date, "dd, LLL, yyyy")}
       </Text>
 
+      <Text style={styles.description}>{replacedAddress(product.address)}</Text>
       <Text style={styles.description}>{product.description}</Text>
 
       <FormDivider />

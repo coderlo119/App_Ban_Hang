@@ -1,5 +1,11 @@
 import { FC } from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import colors from "@utils/color";
 import size from "@utils/size";
@@ -24,9 +30,14 @@ const ChatNotification: FC<Props> = ({ indicate, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: size.padding,
-    alignSelf: "flex-end",
-    position: "relative",
+    width: 43,
+    height: 43,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 15,
   },
   indicator: {
     width: 15,

@@ -9,6 +9,7 @@ import Navigator from "src/navigator";
 import FlashMessage from "react-native-flash-message";
 import { Provider } from "react-redux";
 import store from "@store/index";
+import colors from "@utils/color";
 
 export default function App() {
   return (

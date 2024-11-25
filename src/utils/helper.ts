@@ -1,12 +1,19 @@
 import * as ImagePicker from "expo-image-picker";
 import { showMessage } from "react-native-flash-message";
-import { number } from "yup";
 
 export const formatPrice = (amount: number) => {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(amount);
+};
+export const splitAddress = (address: string) => {
+  const split = address.split("_");
+  return split[0] || "";
+};
+export const replacedAddress = (address: string) => {
+  const rpAddress = address.replace("_", ", ");
+  return rpAddress;
 };
 
 export const selectImages = async (

@@ -7,7 +7,7 @@ interface Props {
   onPress(category: string): void;
 }
 
-const LIST_ITEM_SIZE = 80;
+const LIST_ITEM_SIZE = 50;
 
 const CategoryList: FC<Props> = ({ onPress }) => {
   return (

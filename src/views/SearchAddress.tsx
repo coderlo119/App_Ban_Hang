@@ -14,6 +14,9 @@ import SearchProduct from "@conponents/SearchProduct";
 import { LatestProduct } from "@conponents/LatesProductList";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AppStackParamList } from "@navigator/AppNavigator";
+import { showMessage } from "react-native-flash-message";
+import ShowProduct from "@conponents/SearchProduct";
+import FormDivider from "@Ui/FormDivider";
 
 type tinh = {
   name: string;
@@ -44,6 +47,9 @@ const SearchAddress: React.FC = () => {
       districtName: productInfo.districtName,
     };
 
+    if (!data.provinceName) {
+      showMessage({ message: "Vui lòng chọn tỉnh", type: "warning" });
+    }
     // Kiểm tra dữ liệu trước khi gửi
     if (data.provinceName && data.districtName) {
       const res = await runAxiosAsync<{ results: LatestProduct[] }>(
@@ -53,12 +59,11 @@ const SearchAddress: React.FC = () => {
       );
 
       if (res?.results) {
-        console.log("Kết quả từ API:", res);
         setSearchResults(res.results);
       } else {
-        console.log("Không có dữ liệu trả về.");
+        setSearchResults([]);
       }
-    } else if (data.provinceName) {
+    } else {
       const res = await runAxiosAsync<{ results: LatestProduct[] }>(
         authClient.get(
           `/product/search-byaddress/?ProvinceName=${data.provinceName}`
@@ -66,13 +71,10 @@ const SearchAddress: React.FC = () => {
       );
 
       if (res?.results) {
-        console.log("Kết quả từ API:", res);
         setSearchResults(res.results);
       } else {
-        console.log("Không có dữ liệu trả về.");
+        setSearchResults([]);
       }
-    } else {
-      console.log("Vui lòng nhập tỉnh");
     }
   };
 
@@ -82,63 +84,64 @@ const SearchAddress: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* App Header */}
+    <>
       <AppHeader backButton={<BackButton />} style={styles.header} />
+      <View style={styles.container}>
+        <View style={styles.row}>
+          <View style={styles.halfWidth}>
+            <ProvinceOptions
+              onSelect={(province: tinh) => {
+                setProvinceCode(province.code || null);
+                setProvinceName(province.name);
+                setProductInfo({ ...productInfo, provinceName: province.name });
+              }}
+              title={provinceName || "Chọn tỉnh/thành phố"}
+            />
+          </View>
 
-      {/* Row container for ProvinceOptions and DistrictOptions */}
-      <View style={styles.row}>
-        <View style={styles.halfWidth}>
-          <ProvinceOptions
-            onSelect={(province: tinh) => {
-              setProvinceCode(province.code || null);
-              setProvinceName(province.name);
-              setProductInfo({ ...productInfo, provinceName: province.name });
-            }}
-            title={provinceName || "Chọn tỉnh/thành phố"}
-          />
+          <View style={styles.halfWidth}>
+            <DistrictOptions
+              onSelect={handleDistrictSelect}
+              title={districtName || "Chọn quận/huyện"}
+              provinceCode={provinceCode}
+            />
+          </View>
         </View>
 
-        <View style={styles.halfWidth}>
-          <DistrictOptions
-            onSelect={handleDistrictSelect}
-            title={districtName || "Chọn quận/huyện"}
-            provinceCode={provinceCode}
+        {/* Custom Search Button */}
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={() => {
+            handleSubmit();
+          }}
+        >
+          <Text style={styles.searchButtonText}>Tìm kiếm</Text>
+        </TouchableOpacity>
+        <FormDivider />
+        <View>
+          <ShowProduct
+            title="Sản phẩm ở khu vực bạn đã chọn"
+            data={searchResults}
+            onPress={({ id }) => navigate("SingleProduct", { id })}
           />
         </View>
       </View>
-
-      {/* Custom Search Button */}
-      <TouchableOpacity
-        style={styles.searchButton}
-        onPress={() => {
-          handleSubmit();
-        }}
-      >
-        <Text style={styles.searchButtonText}>Tìm kiếm</Text>
-      </TouchableOpacity>
-      <View>
-        <SearchProduct
-          data={searchResults}
-          onPress={({ id }) => navigate("SingleProduct", { id })}
-        />
-      </View>
-    </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: colors.white,
     padding: size.padding,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   row: {
     flexDirection: "row",
-    marginBottom: 20,
+    marginBottom: 5,
   },
   halfWidth: {
     flex: 1,
@@ -149,14 +152,13 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: "center",
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 4,
   },
   searchButtonText: {
-    color: "white",
+    color: colors.white,
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 8,

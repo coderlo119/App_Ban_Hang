@@ -8,8 +8,8 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
 import colors from "@utils/color";
+import React from "react";
 
 interface Props {
   asButton?: boolean;
@@ -18,12 +18,11 @@ interface Props {
   style?: StyleProp<ViewStyle>;
   value?: string;
 }
+const handleSubmit = async () => {};
 
 const SearchBar: FC<Props> = ({ asButton, onChange, value, onPress }) => {
   return (
     <Pressable onPress={onPress} style={styles.container}>
-      <AntDesign name="search1" size={20} color={colors.primary} />
-
       {asButton ? (
         <View style={styles.textInput}>
           <Text style={styles.fakePlaceholder}>Tìm kiếm...</Text>
@@ -35,7 +34,6 @@ const SearchBar: FC<Props> = ({ asButton, onChange, value, onPress }) => {
           autoFocus
           onChangeText={onChange}
           value={value}
-          onSubmitEditing={() => console.log("asdasdada")}
         />
       )}
     </Pressable>
@@ -63,6 +61,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     opacity: 0.5,
     fontWeight: "200",
+  },
+  searchContainer: {
+    flexDirection: "row",
   },
 });
 

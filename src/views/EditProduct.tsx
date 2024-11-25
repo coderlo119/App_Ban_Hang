@@ -11,7 +11,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { View, StyleSheet, ScrollView, Text, Pressable } from "react-native";
 import FormInput from "@Ui/FormInput";
 import DatePicker from "@Ui/DatePicker";
-import OptionSelector from "./OptionSelector";
 import OptionModal from "@conponents/OptionModal";
 import useClient from "@hooks/useClient";
 import { runAxiosAsync } from "@api/runAxiosAsync";
@@ -23,8 +22,33 @@ import { showMessage } from "react-native-flash-message";
 import mime from "mime";
 import LoadingSpinner from "@Ui/LoadingSpinner";
 import deepEqual from "deep-equal";
+import ProvinceOptions from "@conponents/ProvinceOptions";
+import DistrictOptions from "@conponents/DistrictOptions";
 
 type Props = NativeStackScreenProps<ProfileNavigatorParamList, "EditProduct">;
+
+export type Product = {
+  id: string;
+  name: string;
+  thumbnail?: string;
+  category: string;
+  price: number;
+  image?: string[];
+  date: string;
+  description: string;
+  provinceName: string;
+  districtName: string;
+  seller: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+};
+
+type tinh = {
+  name: string;
+  code?: number;
+};
 
 type ProductInfo = {
   name: string;
@@ -32,6 +56,8 @@ type ProductInfo = {
   category: string;
   price: string;
   purchasingDate: Date;
+  provinceName: string;
+  districtName: string;
 };
 
 const imageOptions = [
@@ -46,6 +72,9 @@ const EditProduct: FC<Props> = ({ route }) => {
     date: new Date(route.params.product.date),
   };
 
+  const [tinhInfo, setTinhInfo] = useState<tinh | undefined>(undefined);
+  const [provinceCode, setProvinceCode] = useState<number | null>();
+
   const [selectedImage, setSelectedImage] = useState("");
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -53,6 +82,9 @@ const EditProduct: FC<Props> = ({ route }) => {
   const { authClient } = useClient();
 
   const isFormChanged = deepEqual(productInfoToUpdate, product);
+
+  const handleChange = (name: string) => (text: string) =>
+    setProduct({ ...product, [name]: text });
 
   const onLongPress = (image: string) => {
     setSelectedImage(image);
@@ -95,6 +127,8 @@ const EditProduct: FC<Props> = ({ route }) => {
       description: product.description,
       price: product.price,
       purchasingDate: product.date,
+      provinceName: product.provinceName,
+      districtName: product.districtName,
     };
     const { error } = await yupValidate(newProductSchema, dataToUpdate);
     if (error) return showMessage({ message: error, type: "danger" });
@@ -171,6 +205,22 @@ const EditProduct: FC<Props> = ({ route }) => {
           <CategoryOptions
             onSelect={(category) => setProduct({ ...product, category })}
             title={product.category || "Category"}
+          />
+          <ProvinceOptions
+            onSelect={(province: tinh) => {
+              setProvinceCode(province.code);
+              setTinhInfo(province);
+              setProduct({ ...product, provinceName: province.name });
+            }}
+            title={
+              product.provinceName || "Chọn tỉnh/thành phố bạn muốn mua hàng"
+            }
+          />
+
+          <DistrictOptions
+            onSelect={handleChange("districtName")}
+            title={product.districtName || "Chọn quận/huyện bạn muốn mua hàng"}
+            provinceCode={provinceCode}
           />
 
           <FormInput

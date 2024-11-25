@@ -3,17 +3,16 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { FC } from "react";
 import Profile from "@views/Profile";
 import Chats from "@views/Chats";
-import Listings from "@views/Listings";
+import Listings, { Product2 } from "@views/Listings";
 import SingleProduct from "@views/SingleProduct";
-import { Product } from "@store/listings";
 import ChatWindow from "@views/ChatWindow";
-import EditProduct from "@views/EditProduct";
+import EditProduct, { Product } from "@views/EditProduct";
 
 export type ProfileNavigatorParamList = {
   Profile: undefined;
   Chats: undefined;
   Listings: undefined;
-  SingleProduct: { product?: Product; id?: string };
+  SingleProduct: { product?: Product2; id?: string };
   EditProduct: { product: Product };
   ChatWindow: {
     conversationId: string;

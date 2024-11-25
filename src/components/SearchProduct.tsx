@@ -7,12 +7,13 @@ import { LatestProduct } from "./LatesProductList";
 interface Props {
   data: LatestProduct[];
   onPress(product: LatestProduct): void;
+  title: string;
 }
 
-const SearchProductList: FC<Props> = ({ data, onPress }) => {
+const ShowProduct: FC<Props> = ({ data, onPress, title }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Kết quả tìm kiếm của bạn</Text>
+      <Text style={styles.title}>{title}</Text>
       <ProductGridView data={data} onPress={onPress} />
     </View>
   );
@@ -29,4 +30,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchProductList;
+export default ShowProduct;

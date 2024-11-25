@@ -12,7 +12,7 @@ import {
   Image,
   SafeAreaView,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import SearchBar from "./SearchBar";
 import colors from "@utils/color";
 import size from "@utils/size";
@@ -28,6 +28,7 @@ import { AppStackParamList } from "@navigator/AppNavigator";
 interface Props {
   visible: boolean;
   onClose(visible: boolean): void;
+  onPress?(): void;
 }
 
 type SearchResult = {
@@ -36,7 +37,7 @@ type SearchResult = {
   thumbnail?: string;
 };
 
-const SearchModal: FC<Props> = ({ visible, onClose }) => {
+const SearchModal: FC<Props> = ({ visible, onClose, onPress }) => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [busy, setBusy] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -55,7 +56,7 @@ const SearchModal: FC<Props> = ({ visible, onClose }) => {
 
   const searchProduct = async (query: string) => {
     if (query.trim().length >= 3) {
-      return await runAxiosAsync<{ results: SearchResult[] }>(
+      return await runAxiosAsync<{ results: [] }>(
         authClient.get("/product/search?name=" + query)
       );
     }
@@ -177,6 +178,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   searchBar: {
+    flexDirection: "row",
     flex: 1,
     marginLeft: size.padding,
   },
@@ -211,6 +213,13 @@ const styles = StyleSheet.create({
   searchResultItem: {
     flexDirection: "row",
     marginBottom: 7,
+  },
+  searchButton: {
+    width: 43,
+    height: 43,
+    borderColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

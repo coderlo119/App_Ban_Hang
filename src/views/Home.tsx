@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import {
   ActiveChat,
@@ -19,11 +19,14 @@ import SearchModal from "@conponents/SearchModal";
 import useAuth from "@hooks/useAuth";
 import useClient from "@hooks/useClient";
 import { AppStackParamList } from "@navigator/AppNavigator";
+import SearchProduct from "@conponents/SearchProduct";
+import ShowProduct from "@conponents/SearchProduct";
 
 interface Props {}
 
 const Home: FC<Props> = () => {
   const [products, setProducts] = useState<LatestProduct[]>([]);
+  const [productsByAddress, setProductsByAddress] = useState<LatestProduct[]>();
   const [showSearchModal, setShowSearchModal] = useState(false);
   const { navigate } = useNavigation<NavigationProp<AppStackParamList>>();
   const { authClient } = useClient();
@@ -39,6 +42,14 @@ const Home: FC<Props> = () => {
       setProducts(res.products);
     }
   };
+  const fetchProductByAddress = async () => {
+    const res = await runAxiosAsync<{ results: LatestProduct[] }>(
+      authClient.get("/product/get-byaddress")
+    );
+    if (res?.results) {
+      setProductsByAddress(res.results);
+    }
+  };
 
   const fetchLastChats = async () => {
     const res = await runAxiosAsync<{ chats: ActiveChat[] }>(
@@ -52,6 +63,7 @@ const Home: FC<Props> = () => {
 
   useEffect(() => {
     const handleApiRequest = async () => {
+      await fetchProductByAddress();
       await fetchLatestProduct();
       await fetchLastChats();
     };
@@ -67,26 +79,33 @@ const Home: FC<Props> = () => {
 
   return (
     <>
-      <ChatNotification
-        onPress={() => navigate("Chats")}
-        indicate={totalUnreadMessages > 0}
-      />
-      <ScrollView style={styles.container}>
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBarContainer}>
-            <SearchBar asButton onPress={() => setShowSearchModal(true)} />
-          </View>
-          <View style={styles.searchAddressButtonContainer}>
-            <SearchAddressButton
-              onPress={() => {
-                navigate("SearchAddress");
-              }}
-            />
-          </View>
+      <View style={styles.headerContainer}>
+        <View style={styles.searchBarContainer}>
+          <SearchBar asButton onPress={() => setShowSearchModal(true)} />
         </View>
+        <View style={styles.searchAddressButtonContainer}>
+          <SearchAddressButton
+            onPress={() => {
+              navigate("SearchAddress");
+            }}
+          />
+        </View>
+        <ChatNotification
+          onPress={() => navigate("Chats")}
+          indicate={totalUnreadMessages > 0}
+        />
+      </View>
+      <ScrollView style={styles.container}>
         <CategoryList
           onPress={(category) => navigate("ProductList", { category })}
         />
+        {productsByAddress ? (
+          <ShowProduct
+            title="Sản phẩm gần bạn"
+            data={productsByAddress}
+            onPress={({ id }) => navigate("SingleProduct", { id })}
+          />
+        ) : null}
         <LatesProductList
           data={products}
           onPress={({ id }) => navigate("SingleProduct", { id })}
@@ -102,17 +121,20 @@ const styles = StyleSheet.create({
     padding: size.padding,
     flex: 1,
   },
-  searchContainer: {
+  headerContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
+    paddingTop: 15,
+    marginLeft: 12,
+    marginBottom: 5,
   },
   searchBarContainer: {
-    flex: 8,
-    marginRight: 8,
+    flex: 6, // Chiếm phần lớn không gian ngang
+    marginRight: 13,
+    marginLeft: 5,
   },
   searchAddressButtonContainer: {
-    flex: 1,
+    flex: 1, // Chiếm không gian ngang tương đương với chatNotification
+    alignItems: "flex-end", // Canh phải (nếu cần)
   },
 });
 

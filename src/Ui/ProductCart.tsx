@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { View, StyleSheet, Text, Pressable, Image } from "react-native";
-import { formatPrice } from "@utils/helper";
+import { formatPrice, splitAddress } from "@utils/helper";
 import colors from "@utils/color";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LatestProduct } from "@conponents/LatesProductList";
@@ -26,6 +26,7 @@ const ProductCart: FC<Props> = ({ product, onPress }) => {
       )}
       <Text style={styles.name}>{product.name}</Text>
       <Text style={styles.price}>{formatPrice(product.price)}</Text>
+      <Text style={styles.address}>{splitAddress(product.address)}</Text>
     </Pressable>
   );
 };
@@ -49,7 +50,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   name: {
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.primary,
+    marginVertical: 5,
+  },
+  address: {
+    fontSize: 12,
     fontWeight: "500",
     color: colors.primary,
     marginVertical: 5,

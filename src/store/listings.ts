@@ -1,29 +1,14 @@
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from ".";
+import { Product2 } from "@views/Listings";
 
-export type Product = {
-  id: string;
-  name: string;
-  thumbnail?: string;
-  category: string;
-  price: number;
-  image?: string[];
-  date: string;
-  description: string;
-  seller: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-};
-
-const initialState: Product[] = [];
+const initialState: Product2[] = [];
 
 const slice = createSlice({
   name: "listing",
   initialState,
   reducers: {
-    updateListings(_, { payload }: PayloadAction<Product[]>) {
+    updateListings(_, { payload }: PayloadAction<Product2[]>) {
       return payload;
     },
     deleteItem(oldListings, { payload }: PayloadAction<string>) {
