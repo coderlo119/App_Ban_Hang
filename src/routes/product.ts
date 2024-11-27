@@ -12,6 +12,8 @@ import {
   getLatestProduct,
   getListings,
   searchProducts,
+  searchByAddress,
+  getByAddress,
 } from "controllers/product";
 import { newProductSchema } from "utils/validationSchema";
 
@@ -39,5 +41,7 @@ productRouter.get("/by-category/:category", getProductByCategory);
 productRouter.get("/latest", getLatestProduct);
 productRouter.get("/listings", isAuth, getListings);
 productRouter.get("/search", isAuth, searchProducts);
+productRouter.get("/search-byaddress", searchByAddress);
+productRouter.get("/get-byaddress", isAuth, getByAddress);
 
 export default productRouter;

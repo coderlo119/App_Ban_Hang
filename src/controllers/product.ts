@@ -2,19 +2,11 @@ import { UploadApiResponse } from "cloudinary";
 import { RequestHandler } from "express";
 import { isValidObjectId, RootFilterQuery } from "mongoose";
 import cloudUploader, { cloudApi } from "src/cloud";
-import ProductModel, { ProductDocuument } from "models/product";
+import ProductModel, { ProductDocument } from "models/product";
 import { UserDocument } from "models/user";
 import { sendErrorRes } from "utils/helper";
-import { date } from "yup";
 import categories from "utils/categories";
 
-// const uploadImage = (filePath: string): Promise<UploadApiResponse> => {
-//   return cloudUploader.upload(filePath, {
-//     width: 1280,
-//     height: 720,
-//     crop: "fill",
-//   });
-// };
 const uploadImage = (filePath: string): Promise<UploadApiResponse> => {
   return cloudUploader.upload(filePath, {
     width: 1000,
@@ -24,7 +16,18 @@ const uploadImage = (filePath: string): Promise<UploadApiResponse> => {
 };
 
 export const listNewProduct: RequestHandler = async (req, res) => {
-  const { name, price, category, description, purchasingDate } = req.body;
+  const {
+    name,
+    price,
+    category,
+    description,
+    purchasingDate,
+    provinceName,
+    districtName,
+  } = req.body;
+
+  const address = provinceName + "_" + districtName;
+
   const newProduct = new ProductModel({
     owner: req.user.id,
     name,
@@ -32,6 +35,7 @@ export const listNewProduct: RequestHandler = async (req, res) => {
     category,
     description,
     purchasingDate,
+    address,
   });
 
   const { images } = req.files;
@@ -82,8 +86,18 @@ export const listNewProduct: RequestHandler = async (req, res) => {
 };
 
 export const updateProduct: RequestHandler = async (req, res) => {
-  const { name, price, category, description, purchasingDate, thumbnail } =
-    req.body;
+  const {
+    name,
+    price,
+    category,
+    description,
+    purchasingDate,
+    thumbnail,
+    provinceName,
+    districtName,
+  } = req.body;
+
+  const address = provinceName + "_" + districtName;
   const productId = req.params.id;
   if (!isValidObjectId(productId))
     return sendErrorRes(res, "Id sản phẩm không hợp lệ!", 422);
@@ -92,7 +106,7 @@ export const updateProduct: RequestHandler = async (req, res) => {
       _id: productId,
       owner: req.user.id,
     },
-    { name, price, category, description, purchasingDate },
+    { name, price, category, description, purchasingDate, address },
     { new: true }
   );
   if (!product) return sendErrorRes(res, "Không tìm thấy sản phẩm!", 404);
@@ -212,6 +226,7 @@ export const getProductDetail: RequestHandler = async (req, res) => {
       date: product.purchasingDate,
       price: product.price,
       image: product.images?.map(({ url }) => url),
+      address: product.address,
       seller: {
         id: product.owner._id,
         name: product.owner.name,
@@ -219,6 +234,7 @@ export const getProductDetail: RequestHandler = async (req, res) => {
       },
     },
   });
+  console.log(product);
 };
 
 export const getProductByCategory: RequestHandler = async (req, res) => {
@@ -242,6 +258,7 @@ export const getProductByCategory: RequestHandler = async (req, res) => {
       thumbnail: p.thumbnail,
       category: p.category,
       price: p.price,
+      address: p?.address,
     };
   });
   res.json({ products: listings });
@@ -256,6 +273,7 @@ export const getLatestProduct: RequestHandler = async (req, res) => {
       thumbnail: p.thumbnail,
       category: p.category,
       price: p.price,
+      address: p?.address,
     };
   });
   res.json({ products: listings });
@@ -282,6 +300,7 @@ export const getListings: RequestHandler = async (req, res) => {
       image: p.images?.map((i) => i.url),
       date: p.purchasingDate,
       description: p.description,
+      address: p.address,
       seller: {
         id: req.user.id,
         name: req.user.name,
@@ -294,7 +313,7 @@ export const getListings: RequestHandler = async (req, res) => {
 export const searchProducts: RequestHandler = async (req, res) => {
   const { name } = req.query;
 
-  const filter: RootFilterQuery<ProductDocuument> = {};
+  const filter: RootFilterQuery<ProductDocument> = {};
 
   if (typeof name === "string") filter.name = { $regex: new RegExp(name, "i") };
 
@@ -305,6 +324,91 @@ export const searchProducts: RequestHandler = async (req, res) => {
       id: product._id,
       name: product.name,
       thumbnail: product.thumbnail,
+      address: product.address,
     })),
   });
+};
+
+export const getByAddress: RequestHandler = async (req, res) => {
+  const filter: RootFilterQuery<ProductDocument> = {};
+
+  // Kiểm tra req.user có tồn tại hay không
+  if (!req.user) {
+    return;
+  }
+
+  const { address } = req.user;
+
+  if (!address) {
+    return;
+  }
+
+  // Tách địa chỉ theo dấu gạch dưới "_"
+  const splitAddress = address.split("_");
+  const city = splitAddress[0]; // Lấy phần thành phố (phần đầu tiên)
+
+  if (city) {
+    // Tìm kiếm theo thành phố với regex không phân biệt chữ hoa/chữ thường
+    filter.address = { $regex: new RegExp(`^${city}`, "i") };
+  } else {
+    sendErrorRes(res, "Địa chỉ không hợp lệ!", 400);
+    return;
+  }
+
+  try {
+    // Tìm sản phẩm theo bộ lọc
+    const products = await ProductModel.find(filter).limit(50);
+
+    res.json({
+      results: products.map((product) => ({
+        id: product._id,
+        name: product.name,
+        address: product.address,
+        thumbnail: product?.thumbnail,
+        category: product.category,
+        price: product.price,
+      })),
+    });
+  } catch (error) {
+    sendErrorRes(res, "Lỗi hệ thống!", 500);
+  }
+};
+
+export const searchByAddress: RequestHandler = async (req, res) => {
+  try {
+    const { ProvinceName, DistrictName } = req.query;
+
+    if (!ProvinceName) {
+      res.status(400).json({ error: "ProvinceName is required." });
+      return; // Không trả về giá trị, chỉ kết thúc hàm.
+    }
+
+    let addressRegex: RegExp;
+    if (DistrictName) {
+      addressRegex = new RegExp(`^${ProvinceName}_${DistrictName}$`, "i");
+    } else {
+      addressRegex = new RegExp(`^${ProvinceName}_(.*)$`, "i");
+    }
+
+    const results = await ProductModel.find({
+      address: { $regex: addressRegex },
+    }).limit(50);
+
+    res.json({
+      results: results.map((item) => ({
+        id: item._id,
+        name: item.name,
+        address: item.address,
+        thumbnail: item?.thumbnail,
+        category: item.category,
+        price: item.price,
+      })),
+    });
+    //console.log(res.json);
+    return; // Đảm bảo không trả về giá trị nào.
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred while searching." });
+    return; // Kết thúc hàm.
+  }
 };

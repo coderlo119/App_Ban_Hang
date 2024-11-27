@@ -30,7 +30,7 @@ const sendVerification = async (email: string, link: string) => {
 
     // Đọc file HTML
     let htmlContent = fs.readFileSync(filePath, "utf-8");
-    htmlContent = htmlContent.replace("{{verify_link}}}", link);
+    htmlContent = htmlContent.replace("{{verify_link}}", link);
     await transport.sendMail({
       from: process.env.GMAIL,
       to: email,

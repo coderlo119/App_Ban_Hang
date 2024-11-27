@@ -15,9 +15,11 @@ const PASSWORD_RESET_LINK = process.env.PASSWORD_RESET_LINK!;
 
 export const createNewUser: RequestHandler = async (req, res) => {
   // đọc dữ liệu nhận vào
-  const { email, password, name } = req.body;
+  const { email, password, name, provinceName, districtName } = req.body;
   // kiểm tra user đã tồn tại hay chưa
   const existingUser = await UserModel.findOne({ email });
+
+  const address = provinceName + "_" + districtName;
 
   if (existingUser) {
     return sendErrorRes(
@@ -27,7 +29,7 @@ export const createNewUser: RequestHandler = async (req, res) => {
     );
   }
   // tạo user mới nếu email chưa tồn tại trong db
-  const user = await UserModel.create({ email, password, name });
+  const user = await UserModel.create({ email, password, name, address });
 
   // tạo và lưu trữ verification token
   const token = crypto.randomBytes(36).toString("hex");
@@ -122,6 +124,7 @@ export const signIn: RequestHandler = async (req, res) => {
       name: user.name,
       verified: user.verified,
       avatar: user.avatar?.url,
+      address: user?.address,
     },
     tokens: { refresh: refreshToken, access: accessToken },
   });
@@ -170,6 +173,7 @@ export const grantAccessToken: RequestHandler = async (req, res) => {
       name: user.name,
       verified: user.verified,
       avatar: user.avatar?.url,
+      address: user?.address,
     },
     tokens: { refresh: newRefreshToken, access: newAccessToken },
   });
@@ -294,6 +298,11 @@ export const sendPublicProfile: RequestHandler = async (req, res) => {
   }
 
   res.json({
-    profile: { id: user._id, name: user.name, avatar: user.avatar?.url },
+    profile: {
+      id: user._id,
+      name: user.name,
+      avatar: user.avatar?.url,
+      address: user?.address,
+    },
   });
 };

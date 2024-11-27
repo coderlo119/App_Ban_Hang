@@ -8,6 +8,7 @@ export interface UserDocument extends Document {
   verified: boolean;
   tokens: string[];
   avatar?: { url: string; id: string };
+  address?: string;
 }
 
 interface Methods {
@@ -32,6 +33,9 @@ const userSchema = new Schema<UserDocument, {}, Methods>(
     verified: {
       type: Boolean,
       default: false,
+    },
+    address: {
+      type: String,
     },
     tokens: [String],
     avatar: {
