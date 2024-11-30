@@ -13,6 +13,7 @@ export interface ProductDocument extends Document {
   thumbnail?: string;
   description: string;
   address?: string;
+  isActive: boolean;
 }
 
 const schema = new Schema<ProductDocument>(
@@ -47,6 +48,10 @@ const schema = new Schema<ProductDocument>(
     },
     address: {
       type: String,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     images: [
       {

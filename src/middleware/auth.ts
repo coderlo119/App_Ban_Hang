@@ -11,6 +11,8 @@ interface UserProfile {
   verified: boolean;
   avatar?: string;
   address?: string;
+  isAdmin: boolean;
+  isActive: boolean;
 }
 
 declare global {
@@ -41,6 +43,8 @@ export const isAuth: RequestHandler = async (req, res, next) => {
       verified: user.verified,
       avatar: user.avatar?.url,
       address: user.address,
+      isAdmin: user.isAdmin,
+      isActive: user.isActive,
     };
 
     next();

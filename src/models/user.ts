@@ -9,6 +9,8 @@ export interface UserDocument extends Document {
   tokens: string[];
   avatar?: { url: string; id: string };
   address?: string;
+  isAdmin: boolean;
+  isActive: boolean;
 }
 
 interface Methods {
@@ -33,6 +35,14 @@ const userSchema = new Schema<UserDocument, {}, Methods>(
     verified: {
       type: Boolean,
       default: false,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     address: {
       type: String,

@@ -14,6 +14,7 @@ import morgan from "morgan";
 import conversationRouter from "./routes/conversation";
 import ConversationModel from "./models/conversation";
 import { updateSeenStatus } from "./controllers/conversation";
+import adminRouter from "./routes/admin";
 
 const app = express();
 const server = http.createServer(app);
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 //API Routes
 app.use("/auth", authRouter);
 app.use("/product", productRouter);
+app.use("/admin", adminRouter);
 app.use("/conversation", conversationRouter);
 
 //SOCKET IO
