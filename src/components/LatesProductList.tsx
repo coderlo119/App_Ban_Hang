@@ -10,6 +10,7 @@ export type LatestProduct = {
   category: string;
   price: number;
   address: string;
+  isActive: boolean;
 };
 
 interface Props {

@@ -7,6 +7,8 @@ export type Profile = {
   name: string;
   verified: boolean;
   avatar?: string;
+  isAdmin: boolean;
+  isActive: boolean;
   accessToken: string;
 };
 

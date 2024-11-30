@@ -19,7 +19,6 @@ import SearchModal from "@conponents/SearchModal";
 import useAuth from "@hooks/useAuth";
 import useClient from "@hooks/useClient";
 import { AppStackParamList } from "@navigator/AppNavigator";
-import SearchProduct from "@conponents/SearchProduct";
 import ShowProduct from "@conponents/SearchProduct";
 
 interface Props {}
@@ -63,7 +62,7 @@ const Home: FC<Props> = () => {
 
   useEffect(() => {
     const handleApiRequest = async () => {
-      await fetchProductByAddress();
+      fetchProductByAddress();
       await fetchLatestProduct();
       await fetchLastChats();
     };

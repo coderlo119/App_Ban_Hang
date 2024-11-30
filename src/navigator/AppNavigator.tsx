@@ -5,9 +5,9 @@ import Home from "@views/Home";
 import Chats from "@views/Chats";
 import ProductList from "@views/ProductList";
 import SingleProduct from "@views/SingleProduct";
-import { Product } from "@store/listings";
 import ChatWindow from "@views/ChatWindow";
 import SearchAddress from "@views/SearchAddress";
+import { Product } from "@views/EditProduct";
 
 export type AppStackParamList = {
   Home: undefined;

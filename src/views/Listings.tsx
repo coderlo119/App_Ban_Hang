@@ -19,28 +19,12 @@ import { ProfileNavigatorParamList } from "@navigator/ProfileNavigator";
 import { getListings, updateListings } from "@store/listings";
 import { useDispatch, useSelector } from "react-redux";
 import colors from "@utils/color";
+import { Product } from "./EditProduct";
 
 interface Props {}
 
-export type Product2 = {
-  id: string;
-  name: string;
-  thumbnail?: string;
-  category: string;
-  price: number;
-  image?: string[];
-  date: string;
-  description: string;
-  address: string;
-  seller: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-};
-
 type ListingResponse = {
-  products: Product2[];
+  products: Product[];
 };
 
 const Listings: FC<Props> = (props) => {

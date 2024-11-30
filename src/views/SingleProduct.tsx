@@ -15,9 +15,10 @@ import { runAxiosAsync } from "@api/runAxiosAsync";
 import { showMessage } from "react-native-flash-message";
 import LoadingSpinner from "@Ui/LoadingSpinner";
 import { useDispatch } from "react-redux";
-import { deleteItem, Product } from "@store/listings";
+import { deleteItem } from "@store/listings";
 import ChatIcon from "@conponents/ChatIcon";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Product } from "./EditProduct";
 
 type Props = NativeStackScreenProps<ProfileNavigatorParamList, "SingleProduct">;
 

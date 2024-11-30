@@ -12,6 +12,7 @@ import useAuth from "@hooks/useAuth";
 import TabNavigator from "./TabNavigator";
 import useClient from "@hooks/useClient";
 import asyncStorage, { Keys } from "@utils/asyncStorage";
+import TabAdminNavigator from "./TabAdminNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,8 @@ export type ProfileRes = {
     email: string;
     name: string;
     verified: boolean;
+    isAdmin: boolean;
+    isActive: boolean;
     avatar?: string;
   };
 };
@@ -69,7 +72,13 @@ const Navigator: FC<Props> = (props) => {
   return (
     <NavigationContainer theme={MyTheme}>
       <LoadingSpinner visible={authState.pending} />
-      {!loggedIn ? <AuthNavigator /> : <TabNavigator />}
+      {!loggedIn ? (
+        <AuthNavigator />
+      ) : !authState.profile?.isAdmin ? (
+        <TabNavigator />
+      ) : (
+        <TabAdminNavigator />
+      )}
     </NavigationContainer>
   );
 };

@@ -20,6 +20,9 @@ export type TokenResponse = {
     name: string;
     verified: boolean;
     avatar?: string;
+    isAdmin: boolean;
+    isActive: boolean;
+    accessToken: string;
   };
 };
 

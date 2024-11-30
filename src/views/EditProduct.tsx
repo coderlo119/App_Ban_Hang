@@ -36,8 +36,10 @@ export type Product = {
   image?: string[];
   date: string;
   description: string;
-  provinceName: string;
-  districtName: string;
+  provinceName?: string;
+  districtName?: string;
+  address?: string;
+  isActive: boolean;
   seller: {
     id: string;
     name: string;
@@ -127,8 +129,8 @@ const EditProduct: FC<Props> = ({ route }) => {
       description: product.description,
       price: product.price,
       purchasingDate: product.date,
-      provinceName: product.provinceName,
-      districtName: product.districtName,
+      provinceName: product.provinceName!,
+      districtName: product.districtName!,
     };
     const { error } = await yupValidate(newProductSchema, dataToUpdate);
     if (error) return showMessage({ message: error, type: "danger" });

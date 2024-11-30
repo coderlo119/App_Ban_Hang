@@ -14,6 +14,8 @@ export interface SignInRes {
     name: string;
     verified: boolean;
     avatar?: string;
+    isAdmin: boolean;
+    isActive: boolean;
   };
   tokens: { access: string; refresh: string };
 }
@@ -33,6 +35,7 @@ const useAuth = () => {
     const res = await runAxiosAsync<SignInRes>(
       client.post("/auth/sign-in", userInfo)
     );
+    console.log(res?.profile);
 
     if (res && res.tokens) {
       await asyncStorage.save(Keys.AUTH_TOKEN, res.tokens.access);

@@ -7,10 +7,10 @@ import { FC } from "react";
 import { View, StyleSheet, Text, ScrollView } from "react-native";
 import ImageSlider from "./ImageSlider";
 import FormDivider from "@Ui/FormDivider";
-import { Product2 } from "@views/Listings";
+import { Product } from "@views/EditProduct";
 
 interface Props {
-  product: Product2;
+  product: Product;
 }
 
 const ProductDetail: FC<Props> = ({ product }) => {
@@ -25,7 +25,9 @@ const ProductDetail: FC<Props> = ({ product }) => {
         Mua ngày: {formatDate(product.date, "dd, LLL, yyyy")}
       </Text>
 
-      <Text style={styles.description}>{replacedAddress(product.address)}</Text>
+      <Text style={styles.description}>
+        {replacedAddress(product.address!)}
+      </Text>
       <Text style={styles.description}>{product.description}</Text>
 
       <FormDivider />
